@@ -1,5 +1,5 @@
 name: Plane
-version: 0.1.1
+version: 0.1.2
 slug: plane
 description: Self-hosted Plane project management for Home Assistant
 url: https://github.com/nkcreation/plane-ha-app

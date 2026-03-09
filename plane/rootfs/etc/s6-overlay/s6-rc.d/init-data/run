@@ -17,15 +17,23 @@ if [ ! -f "${SECRETS_FILE}" ]; then
     POSTGRES_PASSWORD=$(openssl rand -hex 16)
     RABBITMQ_PASSWORD=$(openssl rand -hex 16)
     MINIO_ROOT_PASSWORD=$(openssl rand -hex 16)
+    LIVE_SERVER_SECRET_KEY=$(openssl rand -hex 25)
 
     cat > "${SECRETS_FILE}" <<EOF
 SECRET_KEY=${SECRET_KEY}
 POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
 RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
 MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+LIVE_SERVER_SECRET_KEY=${LIVE_SERVER_SECRET_KEY}
 EOF
     chmod 600 "${SECRETS_FILE}"
     bashio::log.info "Secrets generated and stored."
+fi
+
+# Add missing secrets to existing file (upgrade path)
+if ! grep -q "LIVE_SERVER_SECRET_KEY" "${SECRETS_FILE}"; then
+    bashio::log.info "Adding missing LIVE_SERVER_SECRET_KEY..."
+    echo "LIVE_SERVER_SECRET_KEY=$(openssl rand -hex 25)" >> "${SECRETS_FILE}"
 fi
 
 # Read config
@@ -78,6 +86,9 @@ MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
 
 # File uploads
 FILE_SIZE_LIMIT=5242880
+
+# Live server
+LIVE_SERVER_SECRET_KEY=${LIVE_SERVER_SECRET_KEY}
 
 # Ports
 LISTEN_HTTP_PORT=7281
