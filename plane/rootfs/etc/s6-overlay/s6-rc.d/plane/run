@@ -1,0 +1,33 @@
+#!/command/with-contenv bashio
+# ==============================================================================
+# Start Plane application via supervisord
+# Services managed by supervisord:
+#   - migrator (priority 10, runs once)
+#   - api (Django/gunicorn on port 3004)
+#   - space (React Router on port 3002)
+#   - worker (Celery)
+#   - beat (Celery beat)
+#   - live (WebSocket on port 3005)
+#   - proxy (Caddy on port 80)
+# ==============================================================================
+
+bashio::log.info "Starting Plane application..."
+
+# Source environment
+set -a
+. /data/plane/.env
+set +a
+
+cd /app
+
+# Ensure log directories exist
+mkdir -p /app/logs/access /app/logs/error
+
+# Update plane.env with our environment (start.sh expects this file)
+cp /data/plane/.env /app/plane.env
+
+# Remap Caddy to listen on port 8080 instead of 80
+export SITE_ADDRESS=":8080"
+
+bashio::log.info "Starting supervisord (API, Worker, Beat, Live, Space, Proxy)..."
+exec /usr/local/bin/supervisord -c /etc/supervisor/conf.d/supervisor.conf

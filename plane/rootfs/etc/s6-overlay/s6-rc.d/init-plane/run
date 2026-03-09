@@ -1,0 +1,75 @@
+#!/command/with-contenv bashio
+# ==============================================================================
+# Initialize Plane: create DB user/database, setup RabbitMQ, create MinIO bucket
+# Migrations are handled by supervisord (migrator program, priority 10)
+# ==============================================================================
+
+bashio::log.info "Initializing Plane..."
+
+# Source environment
+. /data/plane/.env
+
+# --------------------------------------------------------------------------
+# Wait for PostgreSQL to be ready
+# --------------------------------------------------------------------------
+bashio::log.info "Waiting for PostgreSQL..."
+for i in $(seq 1 30); do
+    if pg_isready -h 127.0.0.1 -p 5432 > /dev/null 2>&1; then
+        break
+    fi
+    sleep 1
+done
+
+# Create Plane database and user if they don't exist
+bashio::log.info "Setting up PostgreSQL database..."
+su - postgres -c "psql -h 127.0.0.1 -tc \"SELECT 1 FROM pg_roles WHERE rolname='plane'\"" | grep -q 1 || \
+    su - postgres -c "psql -h 127.0.0.1 -c \"CREATE USER plane WITH PASSWORD '${POSTGRES_PASSWORD}';\""
+su - postgres -c "psql -h 127.0.0.1 -tc \"SELECT 1 FROM pg_database WHERE datname='plane'\"" | grep -q 1 || \
+    su - postgres -c "psql -h 127.0.0.1 -c \"CREATE DATABASE plane OWNER plane;\""
+su - postgres -c "psql -h 127.0.0.1 -c \"GRANT ALL PRIVILEGES ON DATABASE plane TO plane;\""
+
+# --------------------------------------------------------------------------
+# Wait for Redis
+# --------------------------------------------------------------------------
+bashio::log.info "Waiting for Redis..."
+for i in $(seq 1 30); do
+    if redis-cli -h 127.0.0.1 -p 6379 ping > /dev/null 2>&1; then
+        break
+    fi
+    sleep 1
+done
+
+# --------------------------------------------------------------------------
+# Wait for RabbitMQ
+# --------------------------------------------------------------------------
+bashio::log.info "Waiting for RabbitMQ..."
+for i in $(seq 1 60); do
+    if rabbitmqctl status > /dev/null 2>&1; then
+        break
+    fi
+    sleep 2
+done
+
+# Setup RabbitMQ vhost and user
+bashio::log.info "Setting up RabbitMQ..."
+rabbitmqctl add_vhost plane 2>/dev/null || true
+rabbitmqctl add_user plane "${RABBITMQ_DEFAULT_PASS}" 2>/dev/null || \
+    rabbitmqctl change_password plane "${RABBITMQ_DEFAULT_PASS}" 2>/dev/null || true
+rabbitmqctl set_permissions -p plane plane ".*" ".*" ".*" 2>/dev/null || true
+
+# --------------------------------------------------------------------------
+# Wait for MinIO and create bucket
+# --------------------------------------------------------------------------
+bashio::log.info "Waiting for MinIO..."
+for i in $(seq 1 30); do
+    if curl -sf http://127.0.0.1:9000/minio/health/live > /dev/null 2>&1; then
+        break
+    fi
+    sleep 1
+done
+
+# Configure MinIO client and create bucket
+mc alias set local http://127.0.0.1:9000 "${MINIO_ROOT_USER}" "${MINIO_ROOT_PASSWORD}" 2>/dev/null || true
+mc mb local/uploads 2>/dev/null || true
+
+bashio::log.info "Plane initialization complete! Migrations will run via supervisord."

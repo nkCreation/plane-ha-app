@@ -1,0 +1,17 @@
+#!/command/with-contenv bashio
+# ==============================================================================
+# Start RabbitMQ
+# ==============================================================================
+
+bashio::log.info "Starting RabbitMQ..."
+
+# Source secrets
+. /data/plane/.env
+
+# Configure RabbitMQ
+export RABBITMQ_MNESIA_BASE=/data/rabbitmq
+export RABBITMQ_LOG_BASE=/data/plane/logs
+export RABBITMQ_NODENAME=rabbit@localhost
+
+# Start RabbitMQ server
+exec rabbitmq-server

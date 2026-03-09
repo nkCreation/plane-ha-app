@@ -1,0 +1,21 @@
+#!/command/with-contenv bashio
+# ==============================================================================
+# Start PostgreSQL
+# ==============================================================================
+
+bashio::log.info "Starting PostgreSQL..."
+
+# Ensure data directory is initialized
+if [ ! -f /data/postgres/PG_VERSION ]; then
+    bashio::log.info "Initializing PostgreSQL database..."
+    chown -R postgres:postgres /data/postgres
+    su-exec postgres initdb -D /data/postgres
+    echo "listen_addresses = '127.0.0.1'" >> /data/postgres/postgresql.conf
+    echo "port = 5432" >> /data/postgres/postgresql.conf
+    echo "unix_socket_directories = '/run/postgresql'" >> /data/postgres/postgresql.conf
+fi
+
+chown -R postgres:postgres /data/postgres /run/postgresql
+
+# Start PostgreSQL
+exec su-exec postgres postgres -D /data/postgres

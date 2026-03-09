@@ -1,0 +1,7 @@
+configuration:
+  domain_name:
+    name: Domain Name
+    description: The domain or hostname where Plane will be accessible (e.g., plane.example.com or localhost)
+  log_level:
+    name: Log Level
+    description: The log level for the addon

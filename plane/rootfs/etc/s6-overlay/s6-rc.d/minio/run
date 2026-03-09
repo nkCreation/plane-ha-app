@@ -1,0 +1,16 @@
+#!/command/with-contenv bashio
+# ==============================================================================
+# Start MinIO (S3-compatible storage)
+# ==============================================================================
+
+bashio::log.info "Starting MinIO..."
+
+# Source environment
+. /data/plane/.env
+
+export MINIO_ROOT_USER="${MINIO_ROOT_USER}"
+export MINIO_ROOT_PASSWORD="${MINIO_ROOT_PASSWORD}"
+
+mkdir -p /data/minio
+
+exec minio server /data/minio --address "127.0.0.1:9000" --console-address "127.0.0.1:9090"

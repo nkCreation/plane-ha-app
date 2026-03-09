@@ -1,0 +1,10 @@
+#!/command/with-contenv bashio
+# ==============================================================================
+# Start Valkey (Redis-compatible)
+# ==============================================================================
+
+bashio::log.info "Starting Valkey..."
+
+mkdir -p /data/valkey
+
+exec valkey-server /etc/valkey/valkey.conf
