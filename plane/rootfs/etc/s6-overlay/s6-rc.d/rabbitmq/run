@@ -8,10 +8,15 @@ bashio::log.info "Starting RabbitMQ..."
 # Source secrets
 . /data/plane/.env
 
+# Ensure directories exist with correct ownership
+mkdir -p /data/rabbitmq /data/plane/logs/rabbitmq
+chown -R rabbitmq:rabbitmq /data/rabbitmq /data/plane/logs/rabbitmq
+
 # Configure RabbitMQ
 export RABBITMQ_MNESIA_BASE=/data/rabbitmq
-export RABBITMQ_LOG_BASE=/data/plane/logs
+export RABBITMQ_LOG_BASE=/data/plane/logs/rabbitmq
 export RABBITMQ_NODENAME=rabbit@localhost
+export RABBITMQ_PID_FILE=/tmp/rabbitmq.pid
 
 # Start RabbitMQ server
 exec rabbitmq-server
