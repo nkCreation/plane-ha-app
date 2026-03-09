@@ -19,7 +19,7 @@ This add-on runs a full self-hosted [Plane](https://plane.so/) instance directly
 2. Install the **Plane** add-on
 3. Configure `domain_name` (see below)
 4. Start the add-on (first start takes a few minutes for database setup)
-5. Access Plane at `http://<your-ha-ip>:8080`
+5. Access Plane at `http://<your-ha-ip>:7281`
 
 ## Configuration
 
@@ -30,11 +30,11 @@ This add-on runs a full self-hosted [Plane](https://plane.so/) instance directly
 
 ## Accessing Plane
 
-The Plane web UI is available on port **8080**. You can access it directly at `http://<your-ha-ip>:8080`.
+The Plane web UI is available on port **7281**. You can access it directly at `http://<your-ha-ip>:7281`.
 
 ### With Traefik / Reverse Proxy
 
-If you use Traefik or another reverse proxy with a custom domain, point your domain to the HA host on port 8080, then set `domain_name` to your custom domain (e.g., `plane.example.com`).
+If you use Traefik or another reverse proxy with a custom domain, point your domain to the HA host on port 7281, then set `domain_name` to your custom domain (e.g., `plane.example.com`).
 
 ## Data Persistence
 

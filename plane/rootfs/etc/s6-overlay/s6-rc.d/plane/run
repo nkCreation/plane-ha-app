@@ -26,8 +26,8 @@ mkdir -p /app/logs/access /app/logs/error
 # Update plane.env with our environment (start.sh expects this file)
 cp /data/plane/.env /app/plane.env
 
-# Remap Caddy to listen on port 8080 instead of 80
-export SITE_ADDRESS=":8080"
+# Remap Caddy to listen on port 7281 instead of 80
+export SITE_ADDRESS=":7281"
 
 bashio::log.info "Starting supervisord (API, Worker, Beat, Live, Space, Proxy)..."
 exec /usr/local/bin/supervisord -c /etc/supervisor/conf.d/supervisor.conf

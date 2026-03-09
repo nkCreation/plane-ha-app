@@ -9,11 +9,11 @@ arch:
 init: false
 startup: services
 boot: auto
-webui: "http://[HOST]:[PORT:8080]"
+webui: "http://[HOST]:[PORT:7281]"
 ports:
-  8080/tcp: 8080
+  7281/tcp: 7281
 ports_description:
-  8080/tcp: Plane Web UI
+  7281/tcp: Plane Web UI
 map:
   - share:rw
   - ssl:ro
